@@ -1,1 +1,69 @@
-what
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Metro Vancouver & Toronto Nearby Snow Resorts</title>
+    <!-- Include Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css">
+    <style>
+        body {
+            background: url('/background-image') no-repeat center center fixed;  no-repeat center center fixed; 
+            -webkit-background-size: cover;
+            -moz-background-size: cover;
+            -o-background-size: cover;
+            background-size: cover;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+        .container {
+            flex: 1;
+        }
+        .footer {
+            text-align: center;
+            font-weight: bold;
+            color: white; /* Set the color to white */
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="text-center my-4">Metro Vancouver Nearby Snow Resorts</h1>
+        <div class="row">
+            <div class="col-lg-3 col-md-6 mb-4">
+                <a href="{{ url_for('resort_page', resort_name='Whistler_Blackcomb') }}" class="btn btn-primary btn-block">Whistler Blackcomb</a>
+            </div>
+            <div class="col-lg-3 col-md-6 mb-4">
+                <a href="{{ url_for('resort_page', resort_name='Cypress_Mountain') }}" class="btn btn-primary btn-block">Cypress Mountain</a>
+            </div>
+            <div class="col-lg-3 col-md-6 mb-4">
+                <a href="{{ url_for('resort_page', resort_name='Grouse_Mountain') }}" class="btn btn-primary btn-block">Grouse Mountain</a>
+            </div>
+            <div class="col-lg-3 col-md-6 mb-4">
+                <a href="{{ url_for('resort_page', resort_name='Mount_Seymour') }}" class="btn btn-primary btn-block">Mount Seymour</a>
+            </div>
+        </div>
+        <h1 class="text-center my-4">Metro Toronto Nearby Snow Resorts</h1>
+        <div class="row">
+            <div class="col-lg-3 col-md-6 mb-4">
+                <a href="{{ url_for('resort_page', resort_name='Blue_Mountain') }}" class="btn btn-primary btn-block">Blue Mountain</a>
+            </div>
+            <div class="col-lg-3 col-md-6 mb-4">
+                <a href="{{ url_for('resort_page', resort_name='Snow_Valley') }}" class="btn btn-primary btn-block">Snow Valley</a>
+            </div>
+            <div class="col-lg-3 col-md-6 mb-4">
+                <a href="{{ url_for('resort_page', resort_name='Mount_St_Louis') }}" class="btn btn-primary btn-block">Mount St. Louis</a>
+            </div>
+            <div class="col-lg-3 col-md-6 mb-4">
+                <a href="{{ url_for('resort_page', resort_name='Hockley_Valley_Resort') }}" class="btn btn-primary btn-block">Hockley Valley Resort</a>
+            </div>
+            <div class="col-lg-3 col-md-6 mb-4">
+                <a href="{{ url_for('resort_page', resort_name='Horseshoe_Resort') }}" class="btn btn-primary btn-block">Horseshoe Resort</a>
+            </div>
+        </div>
+    </div>
+    <div class="footer">
+        <p>If you have any questions or inquiry, please contact <a href="mailto:tobyglimmer@gmail.com">tobyglimmer@gmail.com</a></p>
+    </div>
+</body>
+</html>

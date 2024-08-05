@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Post Comment</title>
+    <!-- Include Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css">
+    <style>
+        body {
+            background: url('/background-image') no-repeat center center fixed; 
+            -webkit-background-size: cover;
+            -moz-background-size: cover;
+            -o-background-size: cover;
+            background-size: cover;
+        }
+    </style>
+    <script>
+        // Client-side validation to ensure that either text or an image is provided
+        function validateCommentForm() {
+            var text = document.forms["commentForm"]["comment"].value;
+            var image = document.forms["commentForm"]["image"].value;
+            if (text.trim() === "" && image.trim() === "") {
+                alert("You must share something before you post a comment, could be either text or photos.");
+                return false;
+            }
+            return true;
+        }
+    </script>
+</head>
+<body>
+    <div class="container">
+        <h1 class="text-center my-4">Post Comment for {{ resort_name }}</h1>
+        <form name="commentForm" action="{{ url_for('post_comment', resort_name=resort_name) }}" method="post" enctype="multipart/form-data" class="mb-4" onsubmit="return validateCommentForm()">
+            <div class="form-group">
+                <textarea name="comment" placeholder="Leave a comment" class="form-control"></textarea>
+            </div>
+            <div class="form-group">
+                <input type="file" name="image" accept="image/*" class="form-control-file">
+            </div>
+            <div class="form-group">
+                <label for="lift">Lift</label>
+                <select name="lift" class="form-control">
+                    <option value="">Select a lift</option>
+                    {% for lift in comment_options['lift'][resort_name] %}
+                        <option value="{{ lift }}">{{ lift }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="Lift Waitting Time">Lift Waiting Time</label>
+                <select name="Lift Waitting Time" class="form-control">
+                    <option value="">Select a lift waiting time</option>
+                    {% for time in comment_options['Lift Waitting Time'] %}
+                        <option value="{{ time }}">{{ time }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="snow_condition">snow_condition</label>
+                <select name="snow_condition" class="form-control">
+                    <option value="">Select a snow condition</option>
+                    {% for condition in comment_options['snow_condition'] %}
+                        <option value="{{ condition }}">{{ condition }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="Visibility">visibility</label>
+                <select name="Visibility" class="form-control">
+                    <option value="">Select a visibility</option>
+                    {% for visibility in comment_options['Visibility'] %}
+                        <option value="{{ visibility }}">{{ visibility }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="Weather">weather</label>
+                <select name="Weather" class="form-control">
+                    <option value="">Select a weather</option>
+                    {% for weather in comment_options['Weather'] %}
+                        <option value="{{ weather }}">{{ weather }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <button type="submit" class="btn btn-primary">Submit Comment</button>
+        </form>
+        <a href="{{ url_for('resort_page', resort_name=resort_name) }}" class="btn btn-secondary">Back to {{ resort_name }} Snow Condition</a>
+    </div>
+</body>
+</html>

@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ resort_name }} Snow Condition</title>
+    <!-- Include Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css">
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js"></script>
+    <style>
+    body {
+        background: url('/background-image') no-repeat center center fixed; 
+        -webkit-background-size: cover;
+        -moz-background-size: cover;
+        -o-background-size: cover;
+        background-size: cover;
+    }
+    .comment-card {
+        grid-template-rows: auto 1fr auto;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+        max-width: 600px;  /* Increase the width of the comment card */
+        max-height: 500px;
+        height: auto;
+        padding: 10px;  /* Add some padding around the contents */
+        overflow-y: auto;  /* Add vertical scrollbars if the contents overflow */
+        overflow-x: hidden;
+    }
+    .comment-image {
+        grid-area: image;
+            max-height: 200px;
+            width: auto;
+    }
+    .comment-options {
+        grid-area: options;
+        right: 10px;
+        top: 10px;
+    }
+    .comment-content {
+        grid-area: content;
+    }
+    .button-group {
+        grid-area: buttons;
+        bottom: 0;
+        left: 0;
+        }
+    .timestamp {
+        grid-area: timestamp;
+        right: 10px;
+        bottom: 10px;
+    }
+    .circle {
+        display: inline-block;
+        width: 10px;
+        height: 10px;
+        margin-right: 5px;
+        border-radius: 50%;
+        background-color: green;  /* Green circle */
+    }
+</style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="text-center my-4 ">{{ resort_name }} Snow Condition</h1>
+        <p class="bold-white-text">You could also check official snow forecast from: 
+            <a href="{{ snow_forecast_links[resort_name] }}" target="_blank">View Snow Forecast</a>
+        </p>   
+        <!-- Display comments -->
+        
+        {% for comment in comments %}
+    <div class="card mb-4 comment-card">
+        <div class="card-body">
+            <p class="card-text">{{ comment.text }}</p>
+                    {% if comment.image %}
+                        <!-- Add data-toggle and data-target attributes to the image -->
+                        <img src="{{ comment.image }}" alt="Comment Image" class="comment-image" data-toggle="modal" data-target="#imageModal{{ loop.index }}">
+                        <!-- Image Modal -->
+                        <div class="modal fade" id="imageModal{{ loop.index }}" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                            <div class="modal-dialog modal-dialog-centered" role="document">
+                                <div class="modal-content">
+                                    <div class="modal-body">
+                                        <img src="{{ comment.image }}" class="img-fluid" alt="Comment Image">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    {% endif %}
+            <div class="comment-options">
+                {% if comment.lift %}
+                    <div class="comment-field">
+                        <span class="circle"></span>
+                        <span>{{ comment.lift }}</span>
+                    </div>
+                {% endif %}
+                {% if comment.lift_waiting_time %}
+                    <div class="comment-field">
+                        <span class="circle"></span>
+                        <span>{{ comment.lift_waiting_time }}</span>
+                    </div>
+                {% endif %}
+                {% if comment.snow_condition %}
+                    <div class="comment-field">
+                        <span class="circle"></span>
+                        <span>{{ comment.snow_condition }}</span>
+                    </div>
+                {% endif %}
+                {% if comment.Visibility %}
+                    <div class="comment-field">
+                        <span class="circle"></span>
+                        <span>{{ comment.Visibility }}</span>
+                    </div>
+                {% endif %}
+                {% if comment.Weather %}
+                    <div class="comment-field">
+                        <span class="circle"></span>
+                        <span>{{ comment.Weather }}</span>
+                    </div>
+                {% endif %}
+            </div>
+            <div class="timestamp text-right text-muted" data-utc-timestamp="{{ comment.timestamp }}">
+                <!-- Local time will be inserted here by JavaScript -->
+            </div>
+            <div class="button-group">
+                <button class="btn btn-success" onclick="incrementYesCounter('{{ resort_name }}', '{{ comment.id }}')">Yes!!!! <span id="yes-counter-{{ comment.id }}">{% if comment.yes_count %}{{ comment.yes_count }}{% endif %}</span></button>
+                <button class="btn btn-danger" onclick="incrementNoCounter('{{ resort_name }}', '{{ comment.id }}')">NO.!!! <span id="no-counter-{{ comment.id }}">{% if comment.no_count %}{{ comment.no_count }}{% endif %}</span></button>
+            </div>
+        </div>
+    </div>
+{% endfor %}
+        <!-- Buttons -->
+        <div class="row">
+            <!-- Link to post a comment -->
+            <div class="col-md-6 mb-2">
+                <a href="{{ url_for('post_comment', resort_name=resort_name) }}" class="btn btn-primary btn-block">Leave a Comment</a>
+            </div>
+            <!-- Link back to the main page -->
+            <div class="col-md-6 mb-2">
+                <a href="{{ url_for('home') }}" class="btn btn-secondary btn-block">Back to Main Page</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    let yesCounters = {};
+    let noCounters = {};
+
+    function updateCounterDisplay(commentId) {
+let yesCounterElement = document.getElementById('yes-counter-' + commentId);
+let noCounterElement = document.getElementById('no-counter-' + commentId);
+
+let yesCount = Number(yesCounters[commentId]) || 0;
+let noCount = Number(noCounters[commentId]) || 0;
+
+yesCounterElement.textContent = yesCount > 0 ? yesCount : '';
+noCounterElement.textContent = noCount > 0 ? noCount : '';
+}
+
+
+    async function handleVote(resortName, commentId, newVoteType) {
+        let currentVote = sessionStorage.getItem('vote-' + commentId);
+
+        // If there is no current vote, just increment the new vote counter
+        if (!currentVote) {
+            await saveCountersToServer(resortName, commentId, newVoteType, true);
+            sessionStorage.setItem('vote-' + commentId, newVoteType);
+            // Set a cookie for the comment ID with the new vote type as its value
+            document.cookie = `vote-${commentId}=${newVoteType}; path=/`;
+        } else if (currentVote === newVoteType) {
+            // If the current vote is the same as the new vote, the user is retracting their vote
+            sessionStorage.removeItem('vote-' + commentId);
+            await saveCountersToServer(resortName, commentId, newVoteType, false);
+            // Remove the cookie for the comment ID
+            document.cookie = `vote-${commentId}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/`;
+        } else {
+            // If the current vote is different from the new vote, the user is changing their vote
+            await saveCountersToServer(resortName, commentId, currentVote, false);
+            await saveCountersToServer(resortName, commentId, newVoteType, true);
+            sessionStorage.setItem('vote-' + commentId, newVoteType);
+            // Update the cookie for the comment ID with the new vote type as its value
+            document.cookie = `vote-${commentId}=${newVoteType}; path=/`;
+        }
+    }
+    // Modify saveCountersToServer to be an async function
+async function saveCountersToServer(resortName, commentId, type, increment) {
+    let action = increment ? 'increment' : 'decrement';
+    try {
+        const response = await fetch('/save_counters', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                resort_name: resortName,
+                comment_id: commentId,
+                action: action,
+                type: type
+            }),
+        });
+        const data = await response.json();
+        if (data.message) {
+            console.log(data.message);
+            // Ensure the server provides numbers for the counts
+            yesCounters[commentId] = Number(data.yes_count) || 0;
+            noCounters[commentId] = Number(data.no_count) || 0;
+            updateCounterDisplay(commentId); // Update the display with the new counts
+        } else if (data.error) {
+            console.error('Failed to save counters:', data.error);
+        }
+    } catch (error) {
+        console.error('Error saving counters:', error);
+    }
+}
+
+    // Update these functions to call handleVote with the correct parameters
+    function incrementYesCounter(resortName, commentId) {
+        handleVote(resortName, commentId, 'yes');
+    }
+
+    function incrementNoCounter(resortName, commentId) {
+        handleVote(resortName, commentId, 'no');
+    }
+
+    function formatDate(date) {
+        return date.toLocaleDateString(undefined, {
+            year: 'numeric', month: 'long', day: 'numeric',
+            hour: '2-digit', minute: '2-digit', second: '2-digit',
+            hour12: false  // Use 24-hour time format, remove if 12-hour format is preferred
+        });
+    }
+
+    // Convert UTC timestamps to local time and display them
+    document.querySelectorAll('[data-utc-timestamp]').forEach(function(element) {
+        var utcTimestamp = element.getAttribute('data-utc-timestamp');
+        console.log('UTC Timestamp:', utcTimestamp); // For debugging
+
+        var localDate = new Date(utcTimestamp); // Directly use the ISO 8601 timestamp
+        console.log('Local Date:', localDate); // For debugging
+        element.textContent = formatDate(localDate);
+    });
+
+    {% for comment in comments %}
+        yesCounters['{{ comment.id }}'] = {{ comment.yes_count }};
+        noCounters['{{ comment.id }}'] = {{ comment.no_count }};
+        updateCounterDisplay('{{ comment.id }}'); // Call this function to initialize the display
+    {% endfor %}
+</script>
+</body>
+</html>
